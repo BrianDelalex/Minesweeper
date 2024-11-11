@@ -18,7 +18,7 @@ fn handle_mouse_event() -> Actions {
                 x: event.x,
                 y: event.y,
             });
-        } else if event.bstate & BUTTON2_CLICKED() != 0 {
+        } else if event.bstate & BUTTON3_CLICKED() != 0 {
             return Actions::RIGHT_CLICK(Click {
                 x: event.x,
                 y: event.y,
