@@ -20,6 +20,7 @@ fn uncover_cell(x: usize, y: usize, game: &mut Game) {
         game.map[index].hidden = false;
     }
     if game.map[index].content == 'x' {
+        uncover_all_mine(game);
         game.state = State::GAME_OVER(false);
     } else {
         uncover_cells(index, game);
@@ -46,7 +47,10 @@ fn uncover_cells(index: usize, game: &mut Game) {
         uncover_zero_adjacent_cell(index, game);
     } else {
         match has_zero_adjacent_cell(index, game) {
-            Some(idx) => uncover_zero_adjacent_cell(idx, game),
+            Some(idx) => {
+                game.map[idx].hidden = false;
+                uncover_zero_adjacent_cell(idx, game);
+            }
             None => {}
         };
     }
@@ -107,6 +111,14 @@ fn uncover_zero_adjacent_cell(index: usize, game: &mut Game) {
                     uncover_zero_adjacent_cell(index2, game);
                 }
             }
+        }
+    }
+}
+
+fn uncover_all_mine(game: &mut Game) {
+    for idx in 0..game.map.len() {
+        if game.map[idx].content == 'x' {
+            game.map[idx].hidden = false;
         }
     }
 }

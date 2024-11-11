@@ -26,6 +26,10 @@ pub const COLOR_WHITE: i16 = 7;
 
 /* COLOR PAIR CONSTANT */
 pub const PAIR_BLUE_WHITE: i32 = 1;
+pub const PAIR_MINE: i32 = 2;
+pub const PAIR_SAFE: i32 = 3;
+pub const PAIR_WARNING: i32 = 4;
+pub const PAIR_DANGER: i32 = 5;
 
 pub const BUTTON_CLICKED: u64 = 004;
 
@@ -117,6 +121,10 @@ pub fn init_curses() {
         mousemask(all_mouse_event() | report_mouse_position(), ptr::null_mut());
         start_color();
         init_pair(PAIR_BLUE_WHITE as i16, COLOR_BLUE, COLOR_WHITE);
+        init_pair(PAIR_MINE as i16, COLOR_RED, COLOR_WHITE);
+        init_pair(PAIR_SAFE as i16, COLOR_GREEN, COLOR_BLACK);
+        init_pair(PAIR_WARNING as i16, COLOR_YELLOW, COLOR_BLACK);
+        init_pair(PAIR_DANGER as i16, COLOR_RED, COLOR_BLACK);
     }
 }
 
