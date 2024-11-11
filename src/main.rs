@@ -1,3 +1,7 @@
+mod game;
+
+mod ncurses;
+
 fn main() {
-    println!("Hello, world!");
+    game::start(20, 20, 5);
 }
