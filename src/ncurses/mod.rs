@@ -1,7 +1,7 @@
 use std::ffi::CString;
 use std::ptr;
 
-use cty::c_char;
+use cty::{c_char, c_short};
 
 static mut WINDOW: *mut cty::c_void = ptr::null_mut();
 
@@ -13,6 +13,19 @@ pub const KEY_BACKSPACE: u32 = 263;
 pub const KEYS_CTRL_LEFT: u32 = 560;
 pub const KEYS_CTRL_RIGHT: u32 = 575;
 pub const KEY_MOUSE: u32 = 409;
+
+/* COLOR CONSTANT */
+pub const COLOR_BLACK: i16 = 0;
+pub const COLOR_RED: i16 = 1;
+pub const COLOR_GREEN: i16 = 2;
+pub const COLOR_YELLOW: i16 = 3;
+pub const COLOR_BLUE: i16 = 4;
+pub const COLOR_MAGENTA: i16 = 5;
+pub const COLOR_CYAN: i16 = 6;
+pub const COLOR_WHITE: i16 = 7;
+
+/* COLOR PAIR CONSTANT */
+pub const PAIR_BLUE_WHITE: i32 = 1;
 
 pub const BUTTON_CLICKED: u64 = 004;
 
@@ -40,11 +53,24 @@ pub fn BUTTON2_CLICKED() -> u64 {
     mouse_mask(2, BUTTON_CLICKED)
 }
 
+pub fn BUTTON3_CLICKED() -> u64 {
+    mouse_mask(3, BUTTON_CLICKED)
+}
+
+pub fn COLOR_PAIR(pair: i32) -> i32 {
+    NCURSES_BITS(pair, 0) & NCURSES_BITS(((1) << 8) - 1, 0)
+}
+
+pub fn NCURSES_BITS(mask: i32, shift: i32) -> i32 {
+    (mask) << ((shift) + 8)
+}
+
 extern "C" {
     fn wrefresh(window: *mut cty::c_void);
     fn wgetch(window: *mut cty::c_void) -> i32;
     fn delch();
     fn pechochar(window: *mut cty::c_void, ch: c_char);
+    fn waddch(window: *mut cty::c_void, ch: c_char);
     fn initscr() -> *mut cty::c_void;
     fn noecho() -> i32;
     fn keypad(window: *mut cty::c_void, value: bool);
@@ -56,6 +82,10 @@ extern "C" {
     fn getmaxy(window: *mut cty::c_void) -> i32;
     fn mousemask(newmask: cty::c_ulong, oldmask: *mut cty::c_void);
     fn getmouse(event: *mut MEVENT) -> i32;
+    fn start_color() -> i32;
+    fn wattron(window: *mut cty::c_void, attrs: cty::c_int);
+    fn wattroff(window: *mut cty::c_void, attrs: cty::c_int);
+    fn init_pair(pair: cty::c_short, fg: cty::c_short, bg: c_short) -> i32;
 }
 
 #[repr(C)]
@@ -85,7 +115,8 @@ pub fn init_curses() {
         noecho();
         keypad(WINDOW, true);
         mousemask(all_mouse_event() | report_mouse_position(), ptr::null_mut());
-        println!("\033[?1003h");
+        start_color();
+        init_pair(PAIR_BLUE_WHITE as i16, COLOR_BLUE, COLOR_WHITE);
     }
 }
 
@@ -107,6 +138,12 @@ pub fn printnlw(text: &str) {
 pub fn echochar(ch: i8) {
     unsafe {
         pechochar(WINDOW, ch);
+    }
+}
+
+pub fn addchar(ch: i8) {
+    unsafe {
+        waddch(WINDOW, ch);
     }
 }
 
@@ -173,4 +210,20 @@ pub fn get_window_size(x: &mut i32, y: &mut i32) {
 
 pub fn get_mouse_event(event: &mut MEVENT) -> i32 {
     unsafe { getmouse(event) }
+}
+
+pub fn attron(attrs: i32) {
+    unsafe {
+        wattron(WINDOW, attrs);
+    }
+}
+
+pub fn attroff(attrs: i32) {
+    unsafe {
+        wattroff(WINDOW, attrs);
+    }
+}
+
+pub fn init_color_pair(pair: i16, fg: i16, bg: i16) -> i32 {
+    unsafe { init_pair(pair, fg, bg) }
 }
