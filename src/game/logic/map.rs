@@ -1,3 +1,5 @@
+use super::generator::generate_map;
+
 pub struct Cell {
     pub hidden: bool,
     pub flagged: u32,
@@ -31,14 +33,27 @@ pub struct Game {
     pub map: Vec<Cell>,
     pub width: u32,
     pub height: u32,
+    pub number_of_mine: u32,
     pub x_offset: u32,
     pub y_offset: u32,
     pub state: State,
     pub count: u32,
-    pub number_of_mine: u32,
 }
 
 impl Game {
+    pub fn new(width: u32, height: u32, number_of_mine: u32, x_offset: u32, y_offset: u32) -> Self {
+        Game {
+            map: generate_map(width, height, number_of_mine),
+            width,
+            height,
+            number_of_mine,
+            x_offset,
+            y_offset,
+            state: State::Running,
+            count: 0,
+        }
+    }
+
     pub fn uncover_cell(&mut self, x: usize, y: usize) {
         let width: usize = self.width as usize;
         let index = y * width + x;
@@ -140,5 +155,39 @@ impl Game {
                 self.map[idx].hidden = false;
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::game::Game;
+    #[test]
+    pub fn check_maps() {
+        let configs = [
+            (10, 10, 10),
+            (100, 100, 100),
+            (1000, 1000, 1000),
+            (50, 50, 50),
+            (74, 74, 200),
+            (4, 4, 1),
+        ];
+        for conf in configs {
+            check_map(conf.0, conf.1, conf.2);
+        }
+    }
+
+    fn check_map(width: u32, height: u32, number_of_mine: u32) {
+        let game = Game::new(width, height, number_of_mine, 0, 0);
+        check_number_of_bomb(&game, number_of_mine);
+    }
+
+    fn check_number_of_bomb(game: &Game, _number_of_mine: u32) {
+        let mut count = 0;
+        for i in 0..game.map.len() {
+            if game.map[i].content == 'x' {
+                count += 1;
+            }
+        }
+        assert!(count == _number_of_mine);
     }
 }

@@ -4,7 +4,6 @@ use inputs::actions::Actions;
 use inputs::handle_input;
 
 pub mod logic;
-use logic::generator::generate_map;
 use logic::map::{Game, State};
 
 mod render;
@@ -14,16 +13,7 @@ use render::{draw_game_over, draw_win, render};
 pub fn start(width: u32, height: u32, number_of_mine: u32) {
     let mut screen_width = 0;
     let mut screen_height = 0;
-    let mut game = Game {
-        map: generate_map(width, height, number_of_mine),
-        width,
-        height,
-        x_offset: 0,
-        y_offset: 0,
-        state: State::Running,
-        count: 0,
-        number_of_mine,
-    };
+    let mut game = Game::new(width, height, number_of_mine, 0, 0);
     init_curses();
     get_window_size(&mut screen_width, &mut screen_height);
     game.x_offset = screen_width as u32 / 2 - width;
