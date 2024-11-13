@@ -4,8 +4,8 @@ pub struct Click {
 }
 
 pub enum Actions {
-    LEFT_CLICK(Click),
-    RIGHT_CLICK(Click),
-    EXIT,
-    INVALID,
+    LeftClick(Click),
+    RightClick(Click),
+    Exit,
+    Invalid,
 }

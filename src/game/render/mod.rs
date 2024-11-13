@@ -1,11 +1,8 @@
-use crate::game::Game;
+use crate::game::logic::map::Game;
 
-use crate::ncurses::{
-    addchar, attroff, attron, clearw, echochar, get_window_size, printw, refreshw, set_cursor_pos,
-    COLOR_PAIR, PAIR_BLUE_WHITE, PAIR_DANGER, PAIR_MINE, PAIR_SAFE, PAIR_WARNING,
-};
+use crate::ncurses::Colors::{PAIR_DANGER, PAIR_MINE, PAIR_SAFE, PAIR_WARNING};
 
-use super::Cell;
+use crate::ncurses::{addchar, attroff, attron, clearw, refreshw, set_cursor_pos, COLOR_PAIR};
 
 pub fn set_color(c: char) {
     match c {
@@ -29,10 +26,12 @@ pub fn render(game: &Game) {
     clearw();
     for y in 0..((game.height) as usize) {
         set_cursor_pos(game.x_offset as i32, (game.y_offset + y as u32) as i32);
-        for x in 0..((game.width - 1) as usize) {
+        for x in 0..(game.width as usize) {
             let cell = game.map[y * (game.width as usize) + x];
             if cell.hidden {
-                if cell.flagged {
+                if cell.flagged == 1 {
+                    addchar('!' as i8);
+                } else if cell.flagged == 2 {
                     addchar('?' as i8);
                 } else {
                     addchar('#' as i8);
@@ -50,6 +49,18 @@ pub fn render(game: &Game) {
 
 pub fn draw_game_over(game: &Game) {
     let txt = String::from("Game Over !");
+    set_cursor_pos(
+        (game.x_offset as i32 + game.width as i32) - txt.len() as i32 / 2,
+        game.y_offset as i32 / 2,
+    );
+    for x in txt.chars() {
+        addchar(x as i8);
+    }
+    refreshw();
+}
+
+pub fn draw_win(game: &Game) {
+    let txt = String::from("You win !");
     set_cursor_pos(
         (game.x_offset as i32 + game.width as i32) - txt.len() as i32 / 2,
         game.y_offset as i32 / 2,

@@ -1,40 +1,47 @@
-use std::ffi::CString;
+#![allow(non_snake_case)]
+#![allow(dead_code)]
+
 use std::ptr;
 
 use cty::{c_char, c_short};
 
 static mut WINDOW: *mut cty::c_void = ptr::null_mut();
 
-pub const KEY_DONW: u32 = 258;
-pub const KEY_UP: u32 = 259;
-pub const KEY_LEFT: u32 = 260;
-pub const KEY_RIGHT: u32 = 261;
-pub const KEY_BACKSPACE: u32 = 263;
-pub const KEYS_CTRL_LEFT: u32 = 560;
-pub const KEYS_CTRL_RIGHT: u32 = 575;
-pub const KEY_MOUSE: u32 = 409;
+pub mod NcursesKeyCode {
+    #![allow(unused_variables)]
+    pub const KEY_DOWN: u32 = 258;
+    pub const KEY_UP: u32 = 259;
+    pub const KEY_LEFT: u32 = 260;
+    pub const KEY_RIGHT: u32 = 261;
+    pub const KEY_BACKSPACE: u32 = 263;
+    pub const KEYS_CTRL_LEFT: u32 = 560;
+    pub const KEYS_CTRL_RIGHT: u32 = 575;
+    pub const KEY_MOUSE: u32 = 409;
+}
 
-/* COLOR CONSTANT */
-pub const COLOR_BLACK: i16 = 0;
-pub const COLOR_RED: i16 = 1;
-pub const COLOR_GREEN: i16 = 2;
-pub const COLOR_YELLOW: i16 = 3;
-pub const COLOR_BLUE: i16 = 4;
-pub const COLOR_MAGENTA: i16 = 5;
-pub const COLOR_CYAN: i16 = 6;
-pub const COLOR_WHITE: i16 = 7;
+pub mod Colors {
+    /* COLOR CONSTANT */
+    pub const COLOR_BLACK: i16 = 0;
+    pub const COLOR_RED: i16 = 1;
+    pub const COLOR_GREEN: i16 = 2;
+    pub const COLOR_YELLOW: i16 = 3;
+    pub const COLOR_BLUE: i16 = 4;
+    pub const COLOR_MAGENTA: i16 = 5;
+    pub const COLOR_CYAN: i16 = 6;
+    pub const COLOR_WHITE: i16 = 7;
 
-/* COLOR PAIR CONSTANT */
-pub const PAIR_BLUE_WHITE: i32 = 1;
-pub const PAIR_MINE: i32 = 2;
-pub const PAIR_SAFE: i32 = 3;
-pub const PAIR_WARNING: i32 = 4;
-pub const PAIR_DANGER: i32 = 5;
+    /* COLOR PAIR CONSTANT */
+    pub const PAIR_BLUE_WHITE: i32 = 1;
+    pub const PAIR_MINE: i32 = 2;
+    pub const PAIR_SAFE: i32 = 3;
+    pub const PAIR_WARNING: i32 = 4;
+    pub const PAIR_DANGER: i32 = 5;
+}
 
 pub const BUTTON_CLICKED: u64 = 004;
 
 fn mouse_mask(b: u64, m: u64) -> u64 {
-    ((m) << (((b) - 1) * 5))
+    (m) << (((b) - 1) * 5)
 }
 
 fn all_mouse_event() -> u64 {
@@ -45,16 +52,8 @@ fn report_mouse_position() -> u64 {
     mouse_mask(6, 0010)
 }
 
-pub fn BUTTON1_PRESSED() -> u64 {
-    mouse_mask(1, 002)
-}
-
 pub fn BUTTON1_CLICKED() -> u64 {
     mouse_mask(1, BUTTON_CLICKED)
-}
-
-pub fn BUTTON2_CLICKED() -> u64 {
-    mouse_mask(2, BUTTON_CLICKED)
 }
 
 pub fn BUTTON3_CLICKED() -> u64 {
@@ -120,26 +119,42 @@ pub fn init_curses() {
         keypad(WINDOW, true);
         mousemask(all_mouse_event() | report_mouse_position(), ptr::null_mut());
         start_color();
-        init_pair(PAIR_BLUE_WHITE as i16, COLOR_BLUE, COLOR_WHITE);
-        init_pair(PAIR_MINE as i16, COLOR_RED, COLOR_WHITE);
-        init_pair(PAIR_SAFE as i16, COLOR_GREEN, COLOR_BLACK);
-        init_pair(PAIR_WARNING as i16, COLOR_YELLOW, COLOR_BLACK);
-        init_pair(PAIR_DANGER as i16, COLOR_RED, COLOR_BLACK);
+        init_pair(
+            Colors::PAIR_BLUE_WHITE as i16,
+            Colors::COLOR_BLUE,
+            Colors::COLOR_WHITE,
+        );
+        init_pair(
+            Colors::PAIR_MINE as i16,
+            Colors::COLOR_RED,
+            Colors::COLOR_WHITE,
+        );
+        init_pair(
+            Colors::PAIR_SAFE as i16,
+            Colors::COLOR_GREEN,
+            Colors::COLOR_BLACK,
+        );
+        init_pair(
+            Colors::PAIR_WARNING as i16,
+            Colors::COLOR_YELLOW,
+            Colors::COLOR_BLACK,
+        );
+        init_pair(
+            Colors::PAIR_DANGER as i16,
+            Colors::COLOR_RED,
+            Colors::COLOR_BLACK,
+        );
     }
 }
 
 pub fn printw(text: &str) {
-    unsafe {
-        for c in String::from(text).chars() {
-            echochar(c as i8);
-        }
+    for c in String::from(text).chars() {
+        echochar(c as i8);
     }
 }
 
 pub fn printnlw(text: &str) {
-    unsafe {
-        printw(text);
-    }
+    printw(text);
     echochar('\n' as i8);
 }
 

@@ -1,13 +1,12 @@
-use crate::game::Cell;
+use super::map::Cell;
 use rand::Rng;
 
 pub fn generate_map(width: u32, height: u32, number_of_mine: u32) -> Vec<Cell> {
     let mut map: Vec<Cell> = vec![
         Cell {
             hidden: true,
-            flagged: false,
+            flagged: 0,
             content: 'o',
-            debug_color: 0,
         };
         (width * height) as usize
     ];
@@ -17,7 +16,7 @@ pub fn generate_map(width: u32, height: u32, number_of_mine: u32) -> Vec<Cell> {
 }
 
 fn generate_mines(map: &mut Vec<Cell>, number_of_mine: u32) {
-    for i in 0..(number_of_mine + 1) {
+    for _i in 0..number_of_mine {
         let mut placed = false;
         'placing: while !placed {
             let num: usize = rand::thread_rng().gen_range(0..map.len());

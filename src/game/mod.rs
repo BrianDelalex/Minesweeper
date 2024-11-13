@@ -3,41 +3,13 @@ use super::ncurses::{get_key_curses, get_window_size, init_curses};
 use inputs::actions::Actions;
 use inputs::handle_input;
 
-mod logic;
+pub mod logic;
 use logic::generator::generate_map;
+use logic::map::{Game, State};
 
 mod render;
 use logic::{process_left_click, process_right_click};
-use render::{draw_game_over, render};
-
-struct Cell {
-    hidden: bool,
-    flagged: bool,
-    content: char,
-    debug_color: i32,
-}
-
-impl Copy for Cell {}
-
-impl Clone for Cell {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
-
-enum State {
-    RUNNING,
-    GAME_OVER(bool),
-}
-
-struct Game {
-    map: Vec<Cell>,
-    width: u32,
-    height: u32,
-    x_offset: u32,
-    y_offset: u32,
-    state: State,
-}
+use render::{draw_game_over, draw_win, render};
 
 pub fn start(width: u32, height: u32, number_of_mine: u32) {
     let mut screen_width = 0;
@@ -48,7 +20,9 @@ pub fn start(width: u32, height: u32, number_of_mine: u32) {
         height,
         x_offset: 0,
         y_offset: 0,
-        state: State::RUNNING,
+        state: State::Running,
+        count: 0,
+        number_of_mine,
     };
     init_curses();
     get_window_size(&mut screen_width, &mut screen_height);
@@ -58,32 +32,36 @@ pub fn start(width: u32, height: u32, number_of_mine: u32) {
 }
 
 pub fn game_loop(game: &mut Game) {
-    while true {
+    while matches!(game.state, State::Running) {
         render(&game);
         let code = get_key_curses() as u32;
         let action = handle_input(code, game);
         match action {
-            Actions::LEFT_CLICK(ac) => process_left_click(&ac, game),
-            Actions::RIGHT_CLICK(ac) => process_right_click(&ac, game),
-            Actions::EXIT => {}
-            Actions::INVALID => {}
+            Actions::LeftClick(ac) => process_left_click(&ac, game),
+            Actions::RightClick(ac) => process_right_click(&ac, game),
+            Actions::Exit => {}
+            Actions::Invalid => {}
         }
         match game.state {
-            State::GAME_OVER(state) => {
+            State::GameOver(state) => {
                 if state {
-                    handle_win()
+                    render(&game);
+                    handle_win(game);
+                    get_key_curses();
                 } else {
                     render(&game);
                     handle_lose(game);
                     get_key_curses();
                 }
             }
-            State::RUNNING => {}
+            State::Running => {}
         }
     }
 }
 
-fn handle_win() {}
+fn handle_win(game: &mut Game) {
+    draw_win(game);
+}
 
 fn handle_lose(game: &mut Game) {
     draw_game_over(game);
