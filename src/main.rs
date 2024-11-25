@@ -1,7 +1,10 @@
+use menus::main_menu::open_main_menu;
+
 mod game;
 
+mod menus;
 mod ncurses;
 
 fn main() {
-    game::start(20, 20, 10);
+    open_main_menu();
 }

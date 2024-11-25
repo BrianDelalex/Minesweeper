@@ -3,7 +3,7 @@
 
 use std::ptr;
 
-use cty::{c_char, c_short};
+use cty::{c_char, c_int, c_short};
 
 static mut WINDOW: *mut cty::c_void = ptr::null_mut();
 
@@ -13,6 +13,7 @@ pub mod NcursesKeyCode {
     pub const KEY_UP: u32 = 259;
     pub const KEY_LEFT: u32 = 260;
     pub const KEY_RIGHT: u32 = 261;
+    pub const KEY_ENTER: u32 = 10;
     pub const KEY_BACKSPACE: u32 = 263;
     pub const KEYS_CTRL_LEFT: u32 = 560;
     pub const KEYS_CTRL_RIGHT: u32 = 575;
@@ -64,6 +65,10 @@ pub fn COLOR_PAIR(pair: i32) -> i32 {
     NCURSES_BITS(pair, 0) & NCURSES_BITS(((1) << 8) - 1, 0)
 }
 
+pub fn A_BLINK() -> i32 {
+    NCURSES_BITS(1, 11)
+}
+
 pub fn NCURSES_BITS(mask: i32, shift: i32) -> i32 {
     (mask) << ((shift) + 8)
 }
@@ -72,6 +77,7 @@ extern "C" {
     fn wrefresh(window: *mut cty::c_void);
     fn wgetch(window: *mut cty::c_void) -> i32;
     fn delch();
+    fn mvwdelch(window: *mut cty::c_void, y: cty::c_int, x: cty::c_int) -> i32;
     fn pechochar(window: *mut cty::c_void, ch: c_char);
     fn waddch(window: *mut cty::c_void, ch: c_char);
     fn initscr() -> *mut cty::c_void;
@@ -89,6 +95,7 @@ extern "C" {
     fn wattron(window: *mut cty::c_void, attrs: cty::c_int);
     fn wattroff(window: *mut cty::c_void, attrs: cty::c_int);
     fn init_pair(pair: cty::c_short, fg: cty::c_short, bg: c_short) -> i32;
+    fn curs_set(visibility: cty::c_int) -> i32;
 }
 
 #[repr(C)]
@@ -190,6 +197,10 @@ pub fn delete_char() {
     }
 }
 
+pub fn delete_char_at(x: i32, y: i32) -> i32 {
+    unsafe { mvwdelch(WINDOW, y, x) }
+}
+
 pub fn delete_str(limit: i32) {
     let mut x = 0;
     let mut y = 0;
@@ -249,4 +260,8 @@ pub fn attroff(attrs: i32) {
 
 pub fn init_color_pair(pair: i16, fg: i16, bg: i16) -> i32 {
     unsafe { init_pair(pair, fg, bg) }
+}
+
+pub fn cursor_set(visibility: i32) -> i32 {
+    unsafe { curs_set(visibility) }
 }
